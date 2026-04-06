@@ -1,10 +1,3 @@
+import { createContext } from "react";
 
-const SocketContext = () => {
-    return (
-        <div>
-            
-        </div>
-    );
-};
-
-export default SocketContext;
+export const SocketContext = createContext(null);
