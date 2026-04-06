@@ -8,7 +8,7 @@ const RootLayout = () => {
         <div className='sticky top-0 z-50'>
             <Navabr></Navabr>
         </div>
-        <div className='min-h-[200px]'>
+        <div className='min-h-[350px]'>
           <Outlet></Outlet>
         </div>
         <div>

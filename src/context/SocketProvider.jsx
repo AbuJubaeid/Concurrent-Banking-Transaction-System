@@ -3,7 +3,6 @@ import { io } from "socket.io-client";
 import { SocketContext } from "./SocketContext";
 
 
-
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
@@ -12,15 +11,14 @@ export const SocketProvider = ({ children }) => {
       transports: ["websocket"],
     });
 
-    // Avoid sync setState warning
     setTimeout(() => setSocket(socketInstance), 0);
 
     socketInstance.on("connect", () => {
-      console.log("✅ Socket connected:", socketInstance.id);
+      console.log("Socket connected:", socketInstance.id);
     });
 
     socketInstance.on("disconnect", () => {
-      console.log("❌ Socket disconnected");
+      console.log("Socket disconnected");
     });
 
     return () => socketInstance.disconnect();
