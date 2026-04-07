@@ -1,16 +1,65 @@
-# React + Vite
+# Concurrent Banking Transaction System:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Concurrent Banking Transaction System is a MERN-based application that
+supports deposit, withdraw, and transfer operations while ensuring safe
+concurrent transaction handling. The system uses optimistic concurrency
+control and MongoDB transactions to prevent race conditions and maintain
+consistent account balances.
 
-Currently, two official plugins are available:
+# Frontend Setup:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install dependencies
+   => npm install
 
-## React Compiler
+2. Start frontend
+   => npm run dev
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Backend Setup:
 
-## Expanding the ESLint configuration
+1. Clone the repository
+   => git clone <repo-link>
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. Install dependencies
+   => npm install
+
+3. Create .env file
+   USER_DB = your_mongodb_user
+   USER_PASS= your_mongodb_password
+   SITE_DOMAIN = http://localhost:5173
+
+4. Start the backend server
+   => npm run dev
+
+# Architecture Explanation:
+
+FrontEnd=> The frontend of the Concurrent Banking Transaction System is built with React and uses Tailwind CSS for styling. It interacts with the backend via REST API calls and receives real-time updates using Socket.IO. The key architectural components are as follows.
+(React, React Router / React Router DOM, Axios, Socket.IO Client, TailwindCSS / @tailwindcss/vite, SweetAlert2)
+
+BackEnd=> The backend of the Concurrent Banking Transaction System is built using Node.js and Express.js, with MongoDB as the database and Socket.IO for real-time communication. It is designed to safely handle high-concurrency financial transactions.
+(Express, MongoDB Driver, Socket.IO, dotenv, CORS)
+
+1. User performs a transaction.
+2. Frontend sends request to API.
+3. Backend processes transaction.
+4. MongoDB transaction ensures atomic updates.
+5. Socket.IO emits real-time events.
+
+# Concurrency Control Strategy:
+
+The system prevents race conditions using a combination of:
+
+1. MongoDB ACID Transactions
+   Transfer operations use MongoDB sessions and transactions to ensure
+   both account updates happen atomically.
+
+2. Balance Validation
+   Withdrawals and transfers check that the account balance is sufficient
+   before updating.
+
+3. Version Field (Optimistic Concurrency)
+   Each account contains a version number that increments after every
+   update, allowing the system to track concurrent modifications.
+
+4. Atomic Updates
+   MongoDB $inc operations ensure balance updates happen safely even
+   under high concurrency.
