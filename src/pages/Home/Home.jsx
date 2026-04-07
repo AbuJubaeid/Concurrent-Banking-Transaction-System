@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import AccountCard from "../../components/AccountCard";
 import BalanceCard from "../../components/BalanceCard";
 import Loader from "../../components/Loader";
@@ -8,42 +9,51 @@ import { useSocket } from "../../hooks/useSocket";
 
 const Home = () => {
   const socket = useSocket();
-  const [accounts, setAccounts] = useState([]);
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [accRes, txRes] = await Promise.all([
-          axiosInstance.get("/api/accounts"),
-          axiosInstance.get("/api/transactions?limit=5"),
-        ]);
-        setAccounts(accRes.data);
-        setTransactions(txRes.data.slice(0, 5));
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const {
+    data: accounts = [],
+    isLoading: accountsLoading,
+  } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/api/accounts");
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
-    fetchData();
-  }, []);
+  const {
+    data: transactions = [],
+    isLoading: transactionsLoading,
+  } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/api/transactions?limit=5");
+      return res.data.slice(0, 5);
+    },
+    refetchOnWindowFocus: false,
+  });
 
-  
+  const loading = accountsLoading || transactionsLoading;
+
+
   useEffect(() => {
     if (!socket) return;
 
     const handleBalanceUpdate = (updatedAccount) => {
-      setAccounts((prev) =>
-        prev.map((acc) => (acc._id === updatedAccount._id ? updatedAccount : acc))
+      queryClient.setQueryData(["accounts"], (oldAccounts = []) =>
+        oldAccounts.map((acc) =>
+          acc._id === updatedAccount._id ? updatedAccount : acc
+        )
       );
     };
 
     const handleNewTransaction = (transaction) => {
-      setTransactions((prev) => [transaction, ...prev].slice(0, 5));
+      queryClient.setQueryData(["transactions"], (oldTx = []) => [
+        transaction,
+        ...oldTx.slice(0, 4),
+      ]);
     };
 
     socket.on("balance:updated", handleBalanceUpdate);
@@ -53,7 +63,7 @@ const Home = () => {
       socket.off("balance:updated", handleBalanceUpdate);
       socket.off("transaction:created", handleNewTransaction);
     };
-  }, [socket]);
+  }, [socket, queryClient]);
 
   if (loading) return <Loader />;
 

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import AccountCard from "../../components/AccountCard";
 import Loader from "../../components/Loader";
 import axiosInstance from "../../hooks/useAxios";
@@ -6,30 +7,23 @@ import { useSocket } from "../../hooks/useSocket";
 
 const Accounts = () => {
   const socket = useSocket();
-  const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const res = await axiosInstance.get("/api/accounts");
-        setAccounts(res.data);
-      } catch (err) {
-        console.error("Failed to fetch accounts:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
+  const { data: accounts = [], isLoading } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/api/accounts");
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (!socket) return;
 
     const handleUpdate = (updatedAccount) => {
-      setAccounts((prev) =>
-        prev.map((acc) =>
+      queryClient.setQueryData(["accounts"], (oldAccounts = []) =>
+        oldAccounts.map((acc) =>
           acc._id === updatedAccount._id ? updatedAccount : acc
         )
       );
@@ -37,9 +31,9 @@ const Accounts = () => {
 
     socket.on("balance:updated", handleUpdate);
     return () => socket.off("balance:updated", handleUpdate);
-  }, [socket]);
+  }, [socket, queryClient]);
 
-  if (loading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <div className="p-6">
