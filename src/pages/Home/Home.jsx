@@ -4,8 +4,8 @@ import AccountCard from "../../components/AccountCard";
 import BalanceCard from "../../components/BalanceCard";
 import Loader from "../../components/Loader";
 import TransactionTable from "../../components/TransactionTable";
-import axiosInstance from "../../hooks/useAxios";
-import { useSocket } from "../../hooks/useSocket";
+import axiosInstance from "../../hooks/UseAxios";
+import { useSocket } from "../../hooks/UseSocket";
 
 const Home = () => {
   const socket = useSocket();

@@ -1,41 +1,39 @@
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import Loader from "../../components/Loader";
 import TransactionTable from "../../components/TransactionTable";
-import axiosInstance from "../../hooks/useAxios";
-import { useSocket } from "../../hooks/useSocket";
+import axiosInstance from "../../hooks/UseAxios";
+import { useSocket } from "../../hooks/UseSocket";
 
 const Transactions = () => {
   const socket = useSocket();
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const res = await axiosInstance.get("/api/transactions");
-        setTransactions(res.data);
-      } catch (err) {
-        console.error("Failed to fetch transactions:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const {
+    data: transactions = [], isLoading: loading,
+  } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/api/transactions");
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
-    fetchTransactions();
-  }, []);
 
-  
   useEffect(() => {
     if (!socket) return;
 
     const handleNewTransaction = (transaction) => {
-      setTransactions((prev) => [transaction, ...prev]);
+      queryClient.setQueryData(["transactions"], (oldTx = []) => [
+        transaction,
+        ...oldTx,
+      ]);
     };
 
     socket.on("transaction:created", handleNewTransaction);
     return () => socket.off("transaction:created", handleNewTransaction);
-  }, [socket]);
+  }, [socket, queryClient]);
 
   if (loading) return <Loader />;
 

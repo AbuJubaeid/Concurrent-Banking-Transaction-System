@@ -2,8 +2,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import AccountCard from "../../components/AccountCard";
 import Loader from "../../components/Loader";
-import axiosInstance from "../../hooks/useAxios";
-import { useSocket } from "../../hooks/useSocket";
+import axiosInstance from "../../hooks/UseAxios";
+import { useSocket } from "../../hooks/UseSocket";
 
 const Accounts = () => {
   const socket = useSocket();

@@ -1,32 +1,25 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import Swal from "sweetalert2";
 import Loader from "../../components/Loader";
-import axiosInstance from "../../hooks/useAxios";
-import { useSocket } from "../../hooks/useSocket";
+import axiosInstance from "../../hooks/UseAxios";
+import { useSocket } from "../../hooks/UseSocket";
 
 const Transfer = () => {
   const socket = useSocket();
-  const [accounts, setAccounts] = useState([]);
+
   const [fromAccount, setFromAccount] = useState("");
   const [toAccount, setToAccount] = useState("");
   const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const res = await axiosInstance.get("/api/accounts");
-        setAccounts(res.data);
-      } catch (err) {
-        console.error("Failed to fetch accounts:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
+  const { data: accounts = [], isLoading: loading } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/api/accounts");
+      return res.data;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   const handleTransfer = async (e) => {
     e.preventDefault();
@@ -77,7 +70,7 @@ const Transfer = () => {
           <select
             value={fromAccount}
             onChange={(e) => setFromAccount(e.target.value)}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300"
           >
             <option value="">-- Select --</option>
             {accounts.map((acc) => (
@@ -93,7 +86,7 @@ const Transfer = () => {
           <select
             value={toAccount}
             onChange={(e) => setToAccount(e.target.value)}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300"
           >
             <option value="">-- Select --</option>
             {accounts.map((acc) => (
@@ -110,14 +103,14 @@ const Transfer = () => {
             type="number"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full border rounded p-2"
+            className="w-full border rounded p-2 hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-300"
             placeholder="Enter amount"
           />
         </div>
 
         <button
           type="submit"
-          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 w-full"
+          className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 w-full transition-colors duration-200"
         >
           Transfer
         </button>

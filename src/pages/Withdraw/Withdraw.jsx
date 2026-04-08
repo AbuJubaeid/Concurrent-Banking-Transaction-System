@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import Loader from "../../components/Loader";
-import axiosInstance from "../../hooks/useAxios";
-import { useSocket } from "../../hooks/useSocket";
+import axiosInstance from "../../hooks/UseAxios";
+import { useSocket } from "../../hooks/UseSocket";
 
 const Withdraw = () => {
   const socket = useSocket();
